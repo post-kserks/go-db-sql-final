@@ -89,57 +89,33 @@ func (s ParcelStore) SetStatus(number int, status string) error {
 }
 
 func (s ParcelStore) SetAddress(number int, address string) error {
-	parcel, err := s.Get(number)
+	query := `UPDATE parcel SET address = ? WHERE number = ? AND status = ?`
+	result, err := s.db.Exec(query, address, number, ParcelStatusRegistered)
 	if err != nil {
 		return err
 	}
-
-	if parcel.Status != ParcelStatusRegistered {
-		return errors.New("нельзя изменить адрес посылки, которая не в статусе 'зарегистрирована'")
-	}
-
-	query := `UPDATE parcel SET address = ? WHERE number = ?`
-	result, err := s.db.Exec(query, address, number)
-	if err != nil {
-		return err
-	}
-
 	rowsAffected, err := result.RowsAffected()
 	if err != nil {
 		return err
 	}
-
 	if rowsAffected == 0 {
-		return errors.New("посылка не найдена")
+		return errors.New("нельзя изменить адрес посылки, которая не в статусе 'зарегистрирована' или не найдена")
 	}
-
 	return nil
 }
 
 func (s ParcelStore) Delete(number int) error {
-	parcel, err := s.Get(number)
+	query := `DELETE FROM parcel WHERE number = ? AND status = ?`
+	result, err := s.db.Exec(query, number, ParcelStatusRegistered)
 	if err != nil {
 		return err
 	}
-
-	if parcel.Status != ParcelStatusRegistered {
-		return errors.New("нельзя удалить посылку, которая не в статусе 'зарегистрирована'")
-	}
-
-	query := `DELETE FROM parcel WHERE number = ?`
-	result, err := s.db.Exec(query, number)
-	if err != nil {
-		return err
-	}
-
 	rowsAffected, err := result.RowsAffected()
 	if err != nil {
 		return err
 	}
-
 	if rowsAffected == 0 {
-		return errors.New("посылка не найдена")
+		return errors.New("нельзя удалить посылку, которая не в статусе 'зарегистрирована' или не найдена")
 	}
-
 	return nil
 }

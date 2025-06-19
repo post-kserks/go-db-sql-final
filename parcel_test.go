@@ -39,10 +39,8 @@ func TestAddGetDelete(t *testing.T) {
 
 	got, err := store.Get(id)
 	require.NoError(t, err)
-	require.Equal(t, parcel.Client, got.Client)
-	require.Equal(t, parcel.Status, got.Status)
-	require.Equal(t, parcel.Address, got.Address)
-	require.Equal(t, parcel.CreatedAt, got.CreatedAt)
+	parcel.Number = id
+	require.Equal(t, parcel, got)
 
 	err = store.Delete(id)
 	require.NoError(t, err)
@@ -69,7 +67,9 @@ func TestSetAddress(t *testing.T) {
 
 	got, err := store.Get(id)
 	require.NoError(t, err)
-	require.Equal(t, newAddress, got.Address)
+	parcel.Number = id
+	parcel.Address = newAddress
+	require.Equal(t, parcel, got)
 }
 
 func TestSetStatus(t *testing.T) {
@@ -89,7 +89,9 @@ func TestSetStatus(t *testing.T) {
 
 	got, err := store.Get(id)
 	require.NoError(t, err)
-	require.Equal(t, ParcelStatusSent, got.Status)
+	parcel.Number = id
+	parcel.Status = ParcelStatusSent
+	require.Equal(t, parcel, got)
 }
 
 func TestGetByClient(t *testing.T) {
@@ -115,9 +117,7 @@ func TestGetByClient(t *testing.T) {
 		id, err := store.Add(parcels[i])
 		require.NoError(t, err)
 		require.Greater(t, id, 0)
-
 		parcels[i].Number = id
-
 		parcelMap[id] = parcels[i]
 	}
 
@@ -128,9 +128,6 @@ func TestGetByClient(t *testing.T) {
 	for _, parcel := range storedParcels {
 		original, exists := parcelMap[parcel.Number]
 		require.True(t, exists)
-		require.Equal(t, original.Client, parcel.Client)
-		require.Equal(t, original.Status, parcel.Status)
-		require.Equal(t, original.Address, parcel.Address)
-		require.Equal(t, original.CreatedAt, parcel.CreatedAt)
+		require.Equal(t, original, parcel)
 	}
 }
